@@ -20,7 +20,7 @@ function App() {
           justifyContent: "space-between",
         }}
       >
-        <Heading>The Trinary Accord [CCPlz] — Tribe</Heading>
+        <Heading>TRIBAL CONTRACT ACCESS</Heading>
         <button
           onClick={() =>
             account?.address ? handleDisconnect() : handleConnect()

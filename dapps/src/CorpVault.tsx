@@ -264,7 +264,7 @@ export function CorpVault() {
     return (
         <div style={{ marginTop: "16px", padding: "16px", border: "1px solid #333", fontFamily: "monospace" }}>
             <h3 style={{ color: "#ff6600", marginBottom: "12px" }}>
-                🏦 CORP VAULT
+                🏦 TRIBE VAULT
                 <button onClick={() => { refetch(); loadVaultInventory(); }} style={{
                     marginLeft: "12px", padding: "2px 8px", backgroundColor: "#222",
                     color: "#888", border: "1px solid #444", cursor: "pointer",

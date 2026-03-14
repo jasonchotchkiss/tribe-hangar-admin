@@ -6,6 +6,7 @@ import { getOwnedObjectsByType, getObjectWithJson, abbreviateAddress } from "@ev
 const CORP_CONFIG_ID = import.meta.env.VITE_CORP_CONFIG_ID;
 const WORLD_PACKAGE_ID = import.meta.env.VITE_EVE_WORLD_PACKAGE_ID;
 const API_URL = import.meta.env.VITE_API_URL || "";
+const ADMIN_CAP_ID = import.meta.env.VITE_ADMIN_CAP_ID;
 
 const client = new SuiJsonRpcClient({
     url: "https://fullnode.testnet.sui.io:443",
@@ -77,7 +78,24 @@ export function TribeAdmin() {
     const [newTribeName, setNewTribeName] = useState("");
     const [status, setStatus] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
+    const [adminName, setAdminName] = useState<string>("");
     const [transferAddress, setTransferAddress] = useState("");
+
+    async function fetchAdminName() {
+        try {
+            const adminCapResult = await client.getObject({
+                id: ADMIN_CAP_ID,
+                options: { showOwner: true },
+            });
+            const ownerAddress = (adminCapResult.data?.owner as any)?.AddressOwner;
+            if (ownerAddress) {
+                const name = await resolveCharacterName(ownerAddress);
+                setAdminName(name);
+            }
+        } catch (err) {
+            console.warn("Could not resolve admin name:", err);
+        }
+    }
 
     async function fetchCorpData() {
         try {
@@ -110,6 +128,7 @@ export function TribeAdmin() {
     }
 
     useEffect(() => {
+        fetchAdminName();
         fetchCorpData();
     }, []);
 
@@ -124,7 +143,7 @@ export function TribeAdmin() {
             await delay(2000);
             await fetchCorpData();
         } catch (err: any) {
-            setStatus(`❌ Error: ${err.message}`);
+            setStatus(`❌ You do not have permission to make this change. Contact ${adminName || "the tribe admin"}.`);
         } finally {
             setIsProcessing(false);
         }
@@ -139,7 +158,7 @@ export function TribeAdmin() {
             await delay(2000);
             await fetchCorpData();
         } catch (err: any) {
-            setStatus(`❌ Error: ${err.message}`);
+            setStatus(`❌ You do not have permission to make this change. Contact ${adminName || "the tribe admin"}.`);
         } finally {
             setIsProcessing(false);
         }
@@ -156,7 +175,7 @@ export function TribeAdmin() {
             await delay(2000);
             await fetchCorpData();
         } catch (err: any) {
-            setStatus(`❌ Error: ${err.message}`);
+            setStatus(`❌ You do not have permission to make this change. Contact ${adminName || "the tribe admin"}.`);
         } finally {
             setIsProcessing(false);
         }
