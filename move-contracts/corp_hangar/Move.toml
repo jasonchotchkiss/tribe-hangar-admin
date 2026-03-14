@@ -1,0 +1,10 @@
+[package]
+name = "corp_hangar"
+edition = "2024"
+authors = ["Sebastian Lance"]
+
+[dependencies]
+world = { local = "../../../world-contracts/contracts/world" }
+
+[environments]
+testnet_stillness = "4c78adac"
