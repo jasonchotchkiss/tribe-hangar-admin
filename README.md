@@ -358,5 +358,11 @@ The EVE Frontier builder community is active in the official EVE Frontier Discor
 
 ---
 
+## Related
+
+- [tribe-hangar-api](https://github.com/jasonchotchkiss/tribe-hangar-api) — The backend API that securely holds the admin key and handles all admin transactions
+
+---
+
 *Built by Jason C. Hotchkiss (aka Sebastian Lance | The Trinary Accord [CCPlz])*
 *Vibe coded with Claude by Anthropic*
