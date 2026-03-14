@@ -295,7 +295,7 @@ Their wallet address is their EVE Vault wallet — they can find it by opening E
 >
 > **Get testnet SUI here:** https://faucet.sui.io — paste your EVE Vault wallet address and click request.
 
-Once funded, a member can:
+Once funded, a member can:clear
 
 1. **Deposit items** into the storage unit via the game client (drag items from ship → storage unit as normal)
 2. Open the dApp and connect their EVE Vault wallet
