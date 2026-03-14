@@ -37,12 +37,12 @@ In EVE Frontier, storage units have a hidden inventory space called the **open i
 
 There are four parts to this system:
 
-| Part               | What it is                                           | Where it runs                      |
-| ------------------ | ---------------------------------------------------- | ---------------------------------- |
-| Smart contract     | The on-chain logic that controls vault access        | Sui blockchain (Stillness testnet) |
-| TypeScript scripts | Command-line tools for initial setup                 | Your Linux server                  |
-| Backend API        | Holds your admin key securely, handles admin actions | Your Linux server (always running) |
-| dApp               | The web interface tribe members use                  | Vercel (public URL)                |
+| Part | What it is | Where it runs |
+|------|-----------|---------------|
+| Smart contract | The on-chain logic that controls vault access | Sui blockchain (Stillness testnet) |
+| TypeScript scripts | Command-line tools for initial setup | Your Linux server |
+| Backend API | Holds your admin key securely, handles admin actions | Your Linux server (always running) |
+| dApp | The web interface tribe members use | Vercel (public URL) |
 
 ---
 
@@ -80,8 +80,8 @@ sui --version     # should show sui x.x.x
 
 ```bash
 cd ~
-git clone https://github.com/evefrontier/builder-scaffold.git
-cd builder-scaffold
+git clone https://github.com/jasonchotchkiss/tribe-hangar-admin.git
+cd tribe-hangar-admin
 pnpm install
 ```
 
@@ -125,14 +125,14 @@ sui client switch --env testnet_stillness
 ## Step 5 — Deploy the Smart Contract
 
 ```bash
-cd ~/builder-scaffold/move-contracts/corp_hangar
+cd ~/tribe-hangar-admin/move-contracts/corp_hangar
 sui move build -e testnet_stillness
-sui move publish -e testnet_stillness --gas-budget 100000000
+sui client publish -e testnet_stillness --gas-budget 100000000
 ```
 
 The output will include a long list of object IDs. Look for these and save them:
 
-- **Package ID** — listed under `Published Objects`, looks like `0xe4bd...`
+- **Package ID** — listed under `Published Objects`, looks like `0x1c65...`
 - This is your `CORP_HANGAR_PACKAGE`
 
 > **Important:** Also note the `original-id` from `Published.toml` in the same folder after publishing. This is different from the Package ID and is needed later.
@@ -142,13 +142,13 @@ The output will include a long list of object IDs. Look for these and save them:
 ## Step 6 — Create Your Tribe Instance
 
 ```bash
-cd ~/builder-scaffold/ts-scripts
+cd ~/tribe-hangar-admin/ts-scripts
 ```
 
 Open the file `.env` in this folder (create it if it doesn't exist) and add:
 ```
 ADMIN_PRIVATE_KEY=your_sui_private_key_here
-CORP_HANGAR_PACKAGE=0xe4bd...   # from Step 5
+CORP_HANGAR_PACKAGE=0x1c65...   # from Step 5
 ```
 
 To get your private key:
@@ -158,7 +158,7 @@ sui keytool export --key-identity your_address_here
 
 Now create your tribe:
 ```bash
-npx ts-node create_corp.ts "Your Tribe Name" "You are not a member of this tribe."
+npx tsx create_corp.ts "Your Tribe Name" "You are not a member of this tribe."
 ```
 
 The output gives you two more important IDs to save:
@@ -170,21 +170,22 @@ The output gives you two more important IDs to save:
 ## Step 7 — Set Up the dApp
 
 ```bash
-cd ~/builder-scaffold/dapps
+cd ~/tribe-hangar-admin/dapps
 cp .env.example .env
 ```
 
 Open `.env` and fill in all the values:
 ```
 VITE_EVE_WORLD_PACKAGE_ID=0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c
-VITE_CORP_HANGAR_PACKAGE=0xe4bd...        # your Package ID from Step 5
+VITE_CORP_HANGAR_PACKAGE_ID=0x1c65...     # your Package ID from Step 5
+VITE_CORP_HANGAR_ORIGINAL_ID=0x...        # original-id from Published.toml
 VITE_CORP_CONFIG_ID=0xf034...             # from Step 6
-VITE_STORAGE_UNIT_ID=0x05b9...           # your storage unit's object ID (find in game)
-VITE_CHARACTER_ID=0x73b3...              # your character's object ID (find in game)
+VITE_ADMIN_CAP_ID=0x8dae...              # from Step 6
+VITE_OBJECT_ID=0x05b9...                 # your storage unit's object ID (find in game)
 VITE_API_URL=                            # leave blank — Vercel serverless functions handle this
 ```
 
-> **Finding your Storage Unit ID and Character ID:** In EVE Frontier, interact with your storage unit and press F. The URL or object inspector will show the object ID. You can also find it via the Sui explorer by searching your wallet address.
+> **Finding your Storage Unit ID:** In EVE Frontier, interact with your storage unit and press F. The URL or object inspector will show the object ID. You can also find it via the Sui explorer by searching your wallet address.
 
 ---
 
@@ -193,21 +194,17 @@ VITE_API_URL=                            # leave blank — Vercel serverless fun
 The backend API holds your admin private key securely on your server. It never touches the frontend.
 
 ```bash
-mkdir ~/corp-storage-api
-cd ~/corp-storage-api
-npm init -y
-npm install express @mysten/sui dotenv
-npm install -D typescript @types/express ts-node
+git clone https://github.com/jasonchotchkiss/tribe-hangar-api.git
+cd tribe-hangar-api
+npm install
 ```
-
-Create a file called `index.ts` in this folder. Copy the backend API code from the project repository into it.
 
 Create a `.env` file in the same folder:
 ```
 ADMIN_PRIVATE_KEY=your_sui_private_key_here
 CORP_CONFIG_ID=0xf034...
 ADMIN_CAP_ID=0x8dae...
-CORP_HANGAR_PACKAGE=0xe4bd...
+CORP_HANGAR_PACKAGE=0x1c65...
 ```
 
 **Install pm2** to keep the API running permanently:
@@ -238,7 +235,7 @@ npm install -g vercel
 
 **Deploy:**
 ```bash
-cd ~/builder-scaffold/dapps
+cd ~/tribe-hangar-admin/dapps
 vercel --prod
 ```
 
@@ -246,12 +243,12 @@ Follow the prompts. When asked for a project name, choose something memorable li
 
 After deploying, go to your Vercel project dashboard at [https://vercel.com](https://vercel.com) and add these **environment variables** (under Settings → Environment Variables):
 
-| Name                  | Value                |
-| --------------------- | -------------------- |
-| `ADMIN_PRIVATE_KEY`   | your Sui private key |
-| `CORP_CONFIG_ID`      | your Corp Config ID  |
-| `ADMIN_CAP_ID`        | your Admin Cap ID    |
-| `CORP_HANGAR_PACKAGE` | your package ID      |
+| Name | Value |
+|------|-------|
+| `ADMIN_PRIVATE_KEY` | your Sui private key |
+| `CORP_CONFIG_ID` | your Corp Config ID |
+| `ADMIN_CAP_ID` | your Admin Cap ID |
+| `CORP_HANGAR_PACKAGE` | your package ID |
 
 After adding them, redeploy:
 ```bash
@@ -295,7 +292,7 @@ Their wallet address is their EVE Vault wallet — they can find it by opening E
 >
 > **Get testnet SUI here:** https://faucet.sui.io — paste your EVE Vault wallet address and click request.
 
-Once funded, a member can:clear
+Once funded, a member can:
 
 1. **Deposit items** into the storage unit via the game client (drag items from ship → storage unit as normal)
 2. Open the dApp and connect their EVE Vault wallet
@@ -310,11 +307,11 @@ Once funded, a member can:clear
 
 All admin functions are in the **TRIBE HANGAR ADMIN** section at the bottom of the dApp. Only the wallet holding the Admin Cap can use these.
 
-| Function       | What it does                                                         |
-| -------------- | -------------------------------------------------------------------- |
-| TRIBESMEN      | Lists all current members with remove buttons                        |
-| ADD TRIBESMAN  | Add a wallet address to the member list                              |
-| TRIBE NAME     | Update the tribe's display name                                      |
+| Function | What it does |
+|----------|-------------|
+| TRIBESMEN | Lists all current members with remove buttons |
+| ADD TRIBESMAN | Add a wallet address to the member list |
+| TRIBE NAME | Update the tribe's display name |
 | TRANSFER ADMIN | Send the AdminCap to another wallet — **you will lose admin access** |
 
 ---
@@ -327,7 +324,7 @@ All admin functions are in the **TRIBE HANGAR ADMIN** section at the bottom of t
 
 **Items must be in the storage unit first.** Players must deposit items into the storage unit via the game client before they can contribute them to the vault. The dApp cannot pull items directly from a ship or personal inventory.
 
-**The open inventory is truly isolated.** Items in the tribe vault cannot be accessed through the game client under any circumstances. Only the dApp can see and move them.
+**The tribe vault is truly isolated.** Items in the tribe vault cannot be accessed through the game client under any circumstances. Only the dApp can see and move them.
 
 **This runs on Stillness testnet.** EVE Frontier is currently in early access and runs on a test blockchain environment. Nothing here uses real money.
 
@@ -335,10 +332,19 @@ All admin functions are in the **TRIBE HANGAR ADMIN** section at the bottom of t
 
 ## Troubleshooting
 
+**"You do not have permission" when adding or removing members**
+- Only the wallet holding the AdminCap can make admin changes. Make sure you are connected with your admin wallet, not your in-game wallet.
+
+**"Could not find character for connected wallet"**
+- Make sure you are connected with your in-game EVE Vault wallet, not your server admin wallet. The contribute and withdraw functions require an in-game character.
+
 **"API request failed" when adding a member**
 - Check that your backend API is running: `pm2 status`
 - If it shows `errored`, restart it: `pm2 restart corp-storage-api`
 - Check the logs: `pm2 logs corp-storage-api`
+
+**Insufficient SUI balance error**
+- The connected wallet needs testnet SUI to pay gas. Go to https://faucet.sui.io and request tokens for that wallet address.
 
 **Items not showing in the vault after contributing**
 - Wait about 5–10 seconds and refresh the dApp. Blockchain state takes a moment to propagate.
@@ -348,7 +354,7 @@ All admin functions are in the **TRIBE HANGAR ADMIN** section at the bottom of t
 - Try refreshing the page or clearing site data
 
 **"Wrong environment" errors when deploying the contract**
-- Always include `-e testnet_stillness` in your `sui move build` and `sui move publish` commands
+- Always include `-e testnet_stillness` in your `sui move build` and `sui client publish` commands
 
 **Vercel deployment fails**
 - Check the build log in your Vercel dashboard for the specific error
