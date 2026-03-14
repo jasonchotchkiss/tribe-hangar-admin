@@ -364,5 +364,5 @@ The EVE Frontier builder community is active in the official EVE Frontier Discor
 
 ---
 
-*Built by Jason C. Hotchkiss (aka Sebastian Lance | The Trinary Accord [CCPlz])*
+*Built by Jason C. Hotchkiss (aka Sebastian Lance | Conflict Curators [CCPlz])*
 *Vibe coded with Claude by Anthropic*
