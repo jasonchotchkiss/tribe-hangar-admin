@@ -37,12 +37,12 @@ In EVE Frontier, storage units have a hidden inventory space called the **open i
 
 There are four parts to this system:
 
-| Part | What it is | Where it runs |
-|------|-----------|---------------|
-| Smart contract | The on-chain logic that controls vault access | Sui blockchain (Stillness testnet) |
-| TypeScript scripts | Command-line tools for initial setup | Your Linux server |
-| Backend API | Holds your admin key securely, handles admin actions | Your Linux server (always running) |
-| dApp | The web interface tribe members use | Vercel (public URL) |
+| Part               | What it is                                           | Where it runs                      |
+| ------------------ | ---------------------------------------------------- | ---------------------------------- |
+| Smart contract     | The on-chain logic that controls vault access        | Sui blockchain (Stillness testnet) |
+| TypeScript scripts | Command-line tools for initial setup                 | Your Linux server                  |
+| Backend API        | Holds your admin key securely, handles admin actions | Your Linux server (always running) |
+| dApp               | The web interface tribe members use                  | Vercel (public URL)                |
 
 ---
 
@@ -246,12 +246,12 @@ Follow the prompts. When asked for a project name, choose something memorable li
 
 After deploying, go to your Vercel project dashboard at [https://vercel.com](https://vercel.com) and add these **environment variables** (under Settings → Environment Variables):
 
-| Name | Value |
-|------|-------|
-| `ADMIN_PRIVATE_KEY` | your Sui private key |
-| `CORP_CONFIG_ID` | your Corp Config ID |
-| `ADMIN_CAP_ID` | your Admin Cap ID |
-| `CORP_HANGAR_PACKAGE` | your package ID |
+| Name                  | Value                |
+| --------------------- | -------------------- |
+| `ADMIN_PRIVATE_KEY`   | your Sui private key |
+| `CORP_CONFIG_ID`      | your Corp Config ID  |
+| `ADMIN_CAP_ID`        | your Admin Cap ID    |
+| `CORP_HANGAR_PACKAGE` | your package ID      |
 
 After adding them, redeploy:
 ```bash
@@ -306,11 +306,11 @@ Once added as a tribesman, a member can:
 
 All admin functions are in the **TRIBE HANGAR ADMIN** section at the bottom of the dApp. Only the wallet holding the Admin Cap can use these.
 
-| Function | What it does |
-|----------|-------------|
-| TRIBESMEN | Lists all current members with remove buttons |
-| ADD TRIBESMAN | Add a wallet address to the member list |
-| TRIBE NAME | Update the tribe's display name |
+| Function       | What it does                                                         |
+| -------------- | -------------------------------------------------------------------- |
+| TRIBESMEN      | Lists all current members with remove buttons                        |
+| ADD TRIBESMAN  | Add a wallet address to the member list                              |
+| TRIBE NAME     | Update the tribe's display name                                      |
 | TRANSFER ADMIN | Send the AdminCap to another wallet — **you will lose admin access** |
 
 ---
@@ -358,4 +358,5 @@ The EVE Frontier builder community is active in the official EVE Frontier Discor
 
 ---
 
-*Built by Sebastian Lance | The Trinary Accord [CCPlz]*
+*Built by Jason C. Hotchkiss (aka Sebastian Lance | The Trinary Accord [CCPlz])*
+*Vibe coded with Claude by Anthropic*
