@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useSmartObject, getDatahubGameInfo } from "@evefrontier/dapp-kit";
+import { useSmartObject, getDatahubGameInfo, getOwnedObjectsByType, getObjectWithJson } from "@evefrontier/dapp-kit";
 import { useDAppKit } from "@mysten/dapp-kit-react";
 import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { Transaction } from "@mysten/sui/transactions";
@@ -39,6 +39,22 @@ function computeOpenInventoryKey(storageUnitId: string): string {
     combined.set(openInventoryBytes, idBytes.length);
     const hash = blake2b(combined, { dkLen: 32 });
     return "0x" + Array.from(hash).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function resolveCharacterId(walletAddress: string): Promise<string | null> {
+    try {
+        const profileType = `${WORLD_PACKAGE_ID}::character::PlayerProfile`;
+        const ownedResult = await getOwnedObjectsByType(walletAddress, profileType);
+        const nodes = ownedResult?.data?.address?.objects?.nodes;
+        if (!nodes || nodes.length === 0) return null;
+        const profileResult = await getObjectWithJson(nodes[0].address);
+        const profileJson = profileResult?.data?.object?.asMoveObject?.contents?.json as any;
+        if (!profileJson?.character_id) return null;
+        return profileJson.character_id;
+    } catch (err) {
+        console.warn("Could not resolve character for", walletAddress, err);
+        return null;
+    }
 }
 
 export function CorpVault() {
@@ -148,7 +164,8 @@ export function CorpVault() {
         setTxStatus("Building contribute transaction...");
         const storageName = assembly.typeDetails?.name || "Corp Storage";
         try {
-            const characterId = assembly.character.id;
+            const characterId = await resolveCharacterId(account.address);
+            if (!characterId) throw new Error("Could not find character for connected wallet. Make sure you are logged in with your in-game wallet.");
             const storageUnitId = assembly.id;
             const storageUnitOwnerCapId = assembly._raw.contents.json.owner_cap_id;
             const tx = new Transaction();
@@ -195,7 +212,8 @@ export function CorpVault() {
         setTxStatus("Building withdrawal transaction...");
         const storageName = assembly.typeDetails?.name || "Corp Storage";
         try {
-            const characterId = assembly.character.id;
+            const characterId = await resolveCharacterId(account.address);
+            if (!characterId) throw new Error("Could not find character for connected wallet. Make sure you are logged in with your in-game wallet.");
             const storageUnitId = assembly.id;
             const storageUnitOwnerCapId = assembly._raw.contents.json.owner_cap_id;
             const tx = new Transaction();
@@ -284,8 +302,7 @@ export function CorpVault() {
                                 }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                         {true && (
-                                            <ItemIcon iconUrl={item.iconUrl} name={item.name}
-                                                 size={24} />
+                                            <ItemIcon iconUrl={item.iconUrl} name={item.name} size={24} />
                                         )}
                                         <div>
                                             <span style={{ color: "#fff", fontSize: "13px" }}>{item.name}</span>
@@ -349,8 +366,8 @@ export function CorpVault() {
                         <div style={{
                             padding: "8px", backgroundColor: "#111", fontSize: "11px",
                             color: txStatus.startsWith("✅") ? "#00ff00" :
-                                   txStatus.startsWith("⚠️") ? "#ffaa00" :
-                                   txStatus.startsWith("❌") ? "#ff4444" : "#ffffff",
+                                txStatus.startsWith("⚠️") ? "#ffaa00" :
+                                    txStatus.startsWith("❌") ? "#ff4444" : "#ffffff",
                             lineHeight: "1.5",
                         }}>
                             {txStatus}
