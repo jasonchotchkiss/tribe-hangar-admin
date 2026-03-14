@@ -291,7 +291,11 @@ Their wallet address is their EVE Vault wallet — they can find it by opening E
 
 ## How Members Use the Vault
 
-Once added as a tribesman, a member can:
+> **Important:** Every wallet that interacts with the blockchain needs a small amount of testnet SUI to pay for transaction fees (called "gas"). This includes tribe members. Before using the dApp for the first time, every member must fund their wallet from the testnet faucet — it's free and takes less than a minute.
+>
+> **Get testnet SUI here:** https://faucet.sui.io — paste your EVE Vault wallet address and click request.
+
+Once funded, a member can:
 
 1. **Deposit items** into the storage unit via the game client (drag items from ship → storage unit as normal)
 2. Open the dApp and connect their EVE Vault wallet
