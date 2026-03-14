@@ -41,7 +41,7 @@ function computeOpenInventoryKey(storageUnitId: string): string {
     return "0x" + Array.from(hash).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function resolveCharacterId(walletAddress: string): Promise<string | null> {
+async function resolveCharacterInfo(walletAddress: string): Promise<{ characterId: string, ownerCapId: string } | null> {
     try {
         const profileType = `${WORLD_PACKAGE_ID}::character::PlayerProfile`;
         const ownedResult = await getOwnedObjectsByType(walletAddress, profileType);
@@ -50,9 +50,15 @@ async function resolveCharacterId(walletAddress: string): Promise<string | null>
         const profileResult = await getObjectWithJson(nodes[0].address);
         const profileJson = profileResult?.data?.object?.asMoveObject?.contents?.json as any;
         if (!profileJson?.character_id) return null;
-        return profileJson.character_id;
+        const charResult = await client.getObject({
+            id: profileJson.character_id,
+            options: { showContent: true },
+        });
+        const charFields = (charResult.data?.content as any)?.fields;
+        if (!charFields?.owner_cap_id) return null;
+        return { characterId: profileJson.character_id, ownerCapId: charFields.owner_cap_id };
     } catch (err) {
-        console.warn("Could not resolve character for", walletAddress, err);
+        console.warn("Could not resolve character info for", walletAddress, err);
         return null;
     }
 }
@@ -164,10 +170,10 @@ export function CorpVault() {
         setTxStatus("Building contribute transaction...");
         const storageName = assembly.typeDetails?.name || "Corp Storage";
         try {
-            const characterId = await resolveCharacterId(account.address);
-            if (!characterId) throw new Error("Could not find character for connected wallet. Make sure you are logged in with your in-game wallet.");
+            const charInfo = await resolveCharacterInfo(account.address);
+            if (!charInfo) throw new Error("Could not find character for connected wallet. Make sure you are logged in with your in-game wallet.");
+            const { characterId, ownerCapId: storageUnitOwnerCapId } = charInfo;
             const storageUnitId = assembly.id;
-            const storageUnitOwnerCapId = assembly._raw.contents.json.owner_cap_id;
             const tx = new Transaction();
             tx.setSender(account.address);
             const [ownerCap, receipt] = tx.moveCall({
@@ -212,16 +218,16 @@ export function CorpVault() {
         setTxStatus("Building withdrawal transaction...");
         const storageName = assembly.typeDetails?.name || "Corp Storage";
         try {
-            const characterId = await resolveCharacterId(account.address);
-            if (!characterId) throw new Error("Could not find character for connected wallet. Make sure you are logged in with your in-game wallet.");
+            const charInfo = await resolveCharacterInfo(account.address);
+            if (!charInfo) throw new Error("Could not find character for connected wallet. Make sure you are logged in with your in-game wallet.");
+            const { characterId } = charInfo;
             const storageUnitId = assembly.id;
-            const storageUnitOwnerCapId = assembly._raw.contents.json.owner_cap_id;
             const tx = new Transaction();
             tx.setSender(account.address);
             const [ownerCap, receipt] = tx.moveCall({
                 target: `${WORLD_PACKAGE_ID}::character::borrow_owner_cap`,
                 typeArguments: [`${WORLD_PACKAGE_ID}::storage_unit::StorageUnit`],
-                arguments: [tx.object(characterId), tx.object(storageUnitOwnerCapId)],
+                arguments: [tx.object(characterId), tx.object(charInfo.ownerCapId)],
             });
             const item = tx.moveCall({
                 target: `${CORP_HANGAR_PACKAGE_ID}::corp_hangar::withdraw`,
