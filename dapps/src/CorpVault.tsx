@@ -172,18 +172,18 @@ export function CorpVault() {
         try {
             const charInfo = await resolveCharacterInfo(account.address);
             if (!charInfo) throw new Error("Could not find character for connected wallet. Make sure you are logged in with your in-game wallet.");
-            const { characterId, ownerCapId: storageUnitOwnerCapId } = charInfo;
+            const { characterId, ownerCapId } = charInfo;
             const storageUnitId = assembly.id;
             const tx = new Transaction();
             tx.setSender(account.address);
             const [ownerCap, receipt] = tx.moveCall({
                 target: `${WORLD_PACKAGE_ID}::character::borrow_owner_cap`,
-                typeArguments: [`${WORLD_PACKAGE_ID}::storage_unit::StorageUnit`],
-                arguments: [tx.object(characterId), tx.object(storageUnitOwnerCapId)],
+                typeArguments: [`${WORLD_PACKAGE_ID}::character::Character`],
+                arguments: [tx.object(characterId), tx.object(ownerCapId)],
             });
             tx.moveCall({
                 target: `${CORP_HANGAR_PACKAGE_ID}::corp_hangar::contribute`,
-                typeArguments: [`${WORLD_PACKAGE_ID}::storage_unit::StorageUnit`],
+                typeArguments: [`${WORLD_PACKAGE_ID}::character::Character`],
                 arguments: [
                     tx.object(CORP_CONFIG_ID),
                     tx.object(storageUnitId),
@@ -195,7 +195,7 @@ export function CorpVault() {
             });
             tx.moveCall({
                 target: `${WORLD_PACKAGE_ID}::character::return_owner_cap`,
-                typeArguments: [`${WORLD_PACKAGE_ID}::storage_unit::StorageUnit`],
+                typeArguments: [`${WORLD_PACKAGE_ID}::character::Character`],
                 arguments: [tx.object(characterId), ownerCap, receipt],
             });
             setTxStatus("Waiting for EVE Vault approval...");
@@ -224,13 +224,8 @@ export function CorpVault() {
             const storageUnitId = assembly.id;
             const tx = new Transaction();
             tx.setSender(account.address);
-            const [ownerCap, receipt] = tx.moveCall({
-                target: `${WORLD_PACKAGE_ID}::character::borrow_owner_cap`,
-                typeArguments: [`${WORLD_PACKAGE_ID}::storage_unit::StorageUnit`],
-                arguments: [tx.object(characterId), tx.object(charInfo.ownerCapId)],
-            });
-            const item = tx.moveCall({
-                target: `${CORP_HANGAR_PACKAGE_ID}::corp_hangar::withdraw`,
+            tx.moveCall({
+                target: `${CORP_HANGAR_PACKAGE_ID}::corp_hangar::withdraw_to_owned`,
                 arguments: [
                     tx.object(CORP_CONFIG_ID),
                     tx.object(storageUnitId),
@@ -238,16 +233,6 @@ export function CorpVault() {
                     tx.pure.u64(parseInt(withdrawTypeId)),
                     tx.pure.u32(parseInt(withdrawQuantity)),
                 ],
-            });
-            tx.moveCall({
-                target: `${WORLD_PACKAGE_ID}::storage_unit::deposit_by_owner`,
-                typeArguments: [`${WORLD_PACKAGE_ID}::storage_unit::StorageUnit`],
-                arguments: [tx.object(storageUnitId), item, tx.object(characterId), ownerCap],
-            });
-            tx.moveCall({
-                target: `${WORLD_PACKAGE_ID}::character::return_owner_cap`,
-                typeArguments: [`${WORLD_PACKAGE_ID}::storage_unit::StorageUnit`],
-                arguments: [tx.object(characterId), ownerCap, receipt],
             });
             setTxStatus("Waiting for EVE Vault approval...");
             await signAndExecuteTransaction({ transaction: tx });
