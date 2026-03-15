@@ -370,6 +370,9 @@ The EVE Frontier builder community is active in the official EVE Frontier Discor
 ```
 ## Changelog
 
+### v1.3.0
+- Fixed withdraw for storage unit owners — items now correctly land in the owner's personal storage unit slot. Previously, withdrawn items were deposited into an extension-keyed slot invisible to both the game client and the dApp. Requires contract v5.
+
 ### v1.2.0
 - Fixed contribute for storage unit owners — the dApp now automatically detects if the connected wallet is the storage unit owner and uses the correct inventory slot. Previously, only regular members could contribute; the owner's items were in a different slot and the transaction would fail.
 
