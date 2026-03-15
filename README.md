@@ -375,3 +375,4 @@ The EVE Frontier builder community is active in the official EVE Frontier Discor
 
 *Built by Jason C. Hotchkiss (aka Sebastian Lance | Conflict Curators [CCPlz])*
 *Vibe coded with Claude by Anthropic*
+*Built on [evefrontier/builder-scaffold](https://github.com/evefrontier/builder-scaffold) — the official EVE Frontier builder template provided by CCP Games*
