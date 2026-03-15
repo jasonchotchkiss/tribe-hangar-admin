@@ -23,9 +23,8 @@ In EVE Frontier, storage units have a hidden inventory space called the **open i
 - **EVE Frontier account** with a character in the game
 - **EVE Vault browser extension** installed — this is your in-game wallet for signing transactions. Get it from the EVE Frontier website.
 - **A storage unit** deployed somewhere in the game world
-- **An Ubuntu Linux server** (or any Linux machine) with internet access — this runs the admin backend. A cheap VPS works fine.
+- **Somewhere to host the backend API — anything that runs Node.js and stays online works: a Linux VPS (DigitalOcean, Linode, Hetzner, etc.), a home server, a cloud VM, or even a spare machine. A cheap VPS is fine. The dApp itself is hosted on Vercel (free) — https://vercel.com
 - **A Windows or Mac computer** for running the game and browser
-- **A Vercel account** (free) for hosting the dApp publicly — [https://vercel.com](https://vercel.com)
 - **Node.js v20** and **pnpm** installed on your Linux server
 - **Sui CLI** installed on your Linux server
 
