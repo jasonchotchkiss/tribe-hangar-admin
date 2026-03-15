@@ -36,12 +36,12 @@ In EVE Frontier, storage units have a hidden inventory space called the **open i
 
 There are four parts to this system:
 
-| Part | What it is | Where it runs |
-|------|-----------|---------------|
-| Smart contract | The on-chain logic that controls vault access | Sui blockchain (Stillness testnet) |
-| TypeScript scripts | Command-line tools for initial setup | Your Linux server |
-| Backend API | Holds your admin key securely, handles admin actions | Your Linux server (always running) |
-| dApp | The web interface tribe members use | Vercel (public URL) |
+| Part               | What it is                                           | Where it runs                      |
+| ------------------ | ---------------------------------------------------- | ---------------------------------- |
+| Smart contract     | The on-chain logic that controls vault access        | Sui blockchain (Stillness testnet) |
+| TypeScript scripts | Command-line tools for initial setup                 | Your Linux server                  |
+| Backend API        | Holds your admin key securely, handles admin actions | Your Linux server (always running) |
+| dApp               | The web interface tribe members use                  | Vercel (public URL)                |
 
 ---
 
@@ -242,12 +242,12 @@ Follow the prompts. When asked for a project name, choose something memorable li
 
 After deploying, go to your Vercel project dashboard at [https://vercel.com](https://vercel.com) and add these **environment variables** (under Settings → Environment Variables):
 
-| Name | Value |
-|------|-------|
-| `ADMIN_PRIVATE_KEY` | your Sui private key |
-| `CORP_CONFIG_ID` | your Corp Config ID |
-| `ADMIN_CAP_ID` | your Admin Cap ID |
-| `CORP_HANGAR_PACKAGE` | your package ID |
+| Name                  | Value                |
+| --------------------- | -------------------- |
+| `ADMIN_PRIVATE_KEY`   | your Sui private key |
+| `CORP_CONFIG_ID`      | your Corp Config ID  |
+| `ADMIN_CAP_ID`        | your Admin Cap ID    |
+| `CORP_HANGAR_PACKAGE` | your package ID      |
 
 After adding them, redeploy:
 ```bash
@@ -296,7 +296,9 @@ Once funded, a member can:
 1. **Deposit items** into the storage unit via the game client (drag items from ship → storage unit as normal)
 2. Open the dApp and connect their EVE Vault wallet
 3. Use **CONTRIBUTE** to move items from their personal slot into the shared tribe vault
-4. Use **WITHDRAW** to take items out of the tribe vault back to their personal slot
+4. The storage unit panel in the game client will not update immediately after contributing — close and reopen it to see the updated counts
+5. Use **WITHDRAW** to take items out of the tribe vault back to their personal slot
+6. The storage unit panel will not update immediately after withdrawing either — close and reopen it to see the updated counts
 
 > Items in the tribe vault are **invisible from the game client**. This is intentional — the dApp is the only way to see and interact with the vault contents.
 
@@ -306,11 +308,11 @@ Once funded, a member can:
 
 All admin functions are in the **TRIBE HANGAR ADMIN** section at the bottom of the dApp. Only the wallet holding the Admin Cap can use these.
 
-| Function | What it does |
-|----------|-------------|
-| TRIBESMEN | Lists all current members with remove buttons |
-| ADD TRIBESMAN | Add a wallet address to the member list |
-| TRIBE NAME | Update the tribe's display name |
+| Function       | What it does                                                         |
+| -------------- | -------------------------------------------------------------------- |
+| TRIBESMEN      | Lists all current members with remove buttons                        |
+| ADD TRIBESMAN  | Add a wallet address to the member list                              |
+| TRIBE NAME     | Update the tribe's display name                                      |
 | TRANSFER ADMIN | Send the AdminCap to another wallet — **you will lose admin access** |
 
 ---
@@ -364,6 +366,22 @@ All admin functions are in the **TRIBE HANGAR ADMIN** section at the bottom of t
 ## Getting Help
 
 The EVE Frontier builder community is active in the official EVE Frontier Discord server in the builder channels. Most questions can also be answered by reading the source code in the `evefrontier/world-contracts` repository — the Move source files are the authoritative reference for what's possible.
+
+```
+## Changelog
+
+### v1.2.0
+- Fixed contribute for storage unit owners — the dApp now automatically detects if the connected wallet is the storage unit owner and uses the correct inventory slot. Previously, only regular members could contribute; the owner's items were in a different slot and the transaction would fail.
+
+### v1.1.0
+- Fixed contribute and withdraw for tribe members (non-owners)
+- Added Transfer Admin UI
+- Added friendly error messages with admin name
+- Tribe branding throughout UI
+- Both repos published on GitHub
+
+### v1.0.0
+- Initial release
 
 ---
 
