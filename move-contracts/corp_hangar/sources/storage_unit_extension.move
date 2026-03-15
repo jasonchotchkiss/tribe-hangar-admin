@@ -225,6 +225,38 @@ public fun withdraw_to_owned(
     );
 }
 
+/// Withdraw from the corp vault directly into the storage unit owner's personal slot.
+/// Uses deposit_by_owner which requires OwnerCap<StorageUnit> — for the storage unit owner only.
+public fun withdraw_to_owned_as_owner(
+    config: &CorpConfig,
+    storage_unit: &mut StorageUnit,
+    character: &Character,
+    owner_cap: &OwnerCap<StorageUnit>,
+    type_id: u64,
+    quantity: u32,
+    ctx: &mut TxContext,
+) {
+    assert!(
+        vector::contains(&config.members, &ctx.sender()),
+        ENotCorpMember
+    );
+    let item = storage_unit::withdraw_from_open_inventory<CorpAuth>(
+        storage_unit,
+        character,
+        CorpAuth {},
+        type_id,
+        quantity,
+        ctx,
+    );
+    storage_unit::deposit_by_owner<StorageUnit>(
+        storage_unit,
+        item,
+        character,
+        owner_cap,
+        ctx,
+    );
+}
+
 // === View Functions ===
 public fun is_member(config: &CorpConfig, addr: address): bool {
     vector::contains(&config.members, &addr)
